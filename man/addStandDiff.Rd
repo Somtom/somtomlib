@@ -8,7 +8,7 @@ It calculates the difference between xi and the rolling mean. At the end it divi
 the calculated difference by the standard deviation and adds the results to dt}
 \usage{
 addStandDiff(dt, nDays, groupVars = "calf", vars, dateColumn = "date",
-  sdMethod = "cumulative")
+  sdMethod = "cumulative", group = FALSE)
 }
 \arguments{
 \item{dt}{data frame which includes the variables for which to calculate the standardized differences}

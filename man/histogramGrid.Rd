@@ -4,7 +4,7 @@
 \alias{histogramGrid}
 \title{A function to plot histograms for all given variables in a dataset and arrange them in a grid}
 \usage{
-histogramGrid(dt, vars, ncols = 2, binwidth = NULL)
+histogramGrid(dt, vars = NA, ncols = 2, binwidth = NULL)
 }
 \arguments{
 \item{dt}{Data.frame containing the variables to plot}
@@ -13,7 +13,7 @@ histogramGrid(dt, vars, ncols = 2, binwidth = NULL)
 
 \item{ncols}{Number of columns in histogram grid. Default: 2}
 
-\item{binwidth}{Custom binwidth for the plots. 
+\item{binwidth}{Custom binwidth for the plots.
 Currently this parameter is used for every historgram}
 }
 \value{

@@ -25,7 +25,8 @@
 #' @export
 
 
-addStandDiff <- function(dt, nDays, groupVars = "calf", vars, dateColumn = "date", sdMethod = "cumulative") {
+addStandDiff <- function(dt, nDays, groupVars = "calf", vars, dateColumn = "date", sdMethod = "cumulative",
+                         group = FALSE) {
 
   library(RcppRoll)
   library(tidyverse)
@@ -65,14 +66,33 @@ addStandDiff <- function(dt, nDays, groupVars = "calf", vars, dateColumn = "date
     }
 
   #Calculate diffToRollMean, customRollSD, standardized Difference and add it to dt
-  dt <- dt %>%
-    arrange_(dateColumn) %>%
-    group_by_at(vars(one_of(groupVars))) %>%
-    mutate_at(.funs = funs(diffToRollMean = diffToRollMean(., nDays),
-                   rollSD = customRollSD(., nDays),
-                   cumSD = sqrt(cumVar(.)),
-                   standardDiff = standDiffToRollMean(., nDays, sdMethod)),
-              .vars = vars(vars))
+  if (group == FALSE) {
+    dt <- dt %>%
+      arrange_(dateColumn) %>%
+      group_by_at(vars(one_of(groupVars))) %>%
+      mutate_at(.funs = funs(diffToRollMean = diffToRollMean(., nDays),
+                             rollSD = customRollSD(., nDays),
+                             cumSD = sqrt(cumVar(.)),
+                             standardDiff = standDiffToRollMean(., nDays, sdMethod)),
+                .vars = vars(vars))
+  } else {
+    vars_group <- if (length(vars) > 1) paste0(vars,"_group") else "group"
+    group <- dt %>%
+      arrange_(dateColumn) %>%
+      # mean of group at day x for variable
+      group_by_(dateColumn) %>%
+      summarise_at(.funs = funs(group = mean(., na.rm = T)),
+                   .vars = vars(vars)) %>%
+      # calculate other variables for group
+      mutate_at(.funs = funs(diffToRollMeanGroup = diffToRollMean(., nDays),
+                             rollSDGroup = customRollSD(., nDays),
+                             cumSDGroup = sqrt(cumVar(.)),
+                             standardDiffGroup = standDiffToRollMean(., nDays, sdMethod)),
+                .vars = vars(vars_group))
+
+    dt <- left_join(dt, group, by = "date")
+  }
+
 
   return(dt)
 }
